@@ -46,11 +46,8 @@ EngineVersion g_evGameEngine;
 
 bool g_bLateLoad = false;
 
-//uncomment the next line if you using DynamicChannels: https://github.com/Vauff/DynamicChannels
-//#define DYNAMIC_CHANNELS
-#if defined DYNAMIC_CHANNELS
-#include <DynamicChannels>
-#endif
+// https://github.com/Vauff/DynamicChannels
+#tryinclude <DynamicChannels>
 
 //Modules can be included as you wish. To do this, comment out or uncomment the corresponding module
 #include "entwatch/module_chat.inc"
