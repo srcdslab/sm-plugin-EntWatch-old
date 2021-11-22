@@ -447,14 +447,14 @@ public Action EWM_Hud_Timer_DisplayHUD(Handle timer, int client)
 					{
 						if(g_CSettings_Hud[i].Name)
 						{
-							#if defined DYNAMIC_CHANNELS
+							#if defined _DynamicChannels_included_
 							ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageAdmins);
 							#else
 							ShowHudText(i, g_iHUDChannel, sMessageAdmins);
 							#endif
 						}else
 						{
-							#if defined DYNAMIC_CHANNELS
+							#if defined _DynamicChannels_included_
 							ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageAdmins_withoutname);
 							#else
 							ShowHudText(i, g_iHUDChannel, sMessageAdmins_withoutname);
@@ -466,14 +466,14 @@ public Action EWM_Hud_Timer_DisplayHUD(Handle timer, int client)
 						{
 							if(g_CSettings_Hud[i].Name)
 							{
-								#if defined DYNAMIC_CHANNELS
+								#if defined _DynamicChannels_included_
 								ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageHumans);
 								#else
 								ShowHudText(i, g_iHUDChannel, sMessageHumans);
 								#endif
 							}else
 							{
-								#if defined DYNAMIC_CHANNELS
+								#if defined _DynamicChannels_included_
 								ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageHumans_withoutname);
 								#else
 								ShowHudText(i, g_iHUDChannel, sMessageHumans_withoutname);
@@ -486,14 +486,14 @@ public Action EWM_Hud_Timer_DisplayHUD(Handle timer, int client)
 						{
 							if(g_CSettings_Hud[i].Name)
 							{
-								#if defined DYNAMIC_CHANNELS
+								#if defined _DynamicChannels_included_
 								ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageZombies);
 								#else
 								ShowHudText(i, g_iHUDChannel, sMessageZombies);
 								#endif
 							}else
 							{
-								#if defined DYNAMIC_CHANNELS
+								#if defined _DynamicChannels_included_
 								ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageZombies_withoutname);
 								#else
 								ShowHudText(i, g_iHUDChannel, sMessageZombies_withoutname);
@@ -504,14 +504,14 @@ public Action EWM_Hud_Timer_DisplayHUD(Handle timer, int client)
 					{
 						if(g_CSettings_Hud[i].Name)
 						{
-							#if defined DYNAMIC_CHANNELS
+							#if defined _DynamicChannels_included_
 							ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageAdmins);
 							#else
 							ShowHudText(i, g_iHUDChannel, sMessageAdmins);
 							#endif
 						}else
 						{
-							#if defined DYNAMIC_CHANNELS
+							#if defined _DynamicChannels_included_
 							ShowHudText(i, GetDynamicChannel(g_iHUDChannel), sMessageAdmins_withoutname);
 							#else
 							ShowHudText(i, g_iHUDChannel, sMessageAdmins_withoutname);
