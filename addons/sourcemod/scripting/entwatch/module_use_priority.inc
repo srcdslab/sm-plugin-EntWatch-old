@@ -54,7 +54,7 @@ public Action OnPlayerRunCmd(int iClient, int& iButtons, int& iImpulse, float aV
 				g_ItemList.GetArray(i, ItemTest, sizeof(ItemTest));
 				if(ItemTest.OwnerID == iClient)
 				{
-					if(!ItemTest.UsePriority || ItemTest.CheckDelay() > 0)
+					if(ItemTest.CheckDelay() > 0)
 					{
 						bHasNotDelay = false;
 						break;

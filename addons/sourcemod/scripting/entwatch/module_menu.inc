@@ -11,6 +11,11 @@ stock void EWM_Menu_OnPluginStart()
 	if (LibraryExists("adminmenu") && ((hTopMenu = GetAdminTopMenu()) != INVALID_HANDLE)) OnAdminMenuReady(hTopMenu);
 }
 
+stock void EWM_Menu_OnConfigsExecuted()
+{
+	
+}
+
 //-------------------------------------------------------
 // Purpose: Safeguard against adminmenu unloading
 //-------------------------------------------------------

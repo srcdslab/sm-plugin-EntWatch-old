@@ -413,6 +413,14 @@
 	{
 		"en" 	"Default"
 	}
+	"Modified"
+	{
+		"en"	"Modified"
+	}
+	"Hud Type"
+	{
+		"en" 	"Type of HUD"
+	}
 	"Hud Names"
 	{
 		"en" 	"Names in HUD are"
