@@ -1,7 +1,13 @@
 <?php
+include_once 'init.php';
 require_once('protect.php');
 require_once('steamid.php');
 require_once('connect.php');
+
+include_once(INCLUDES_PATH . "/callbacks.php");
+$xajax->processRequests();
+session_start();
+print_r($xajax->printJavascript("", "xajax.js"));
 
 function declension($digit,$expr,$onlyword=false)
 {
@@ -49,10 +55,12 @@ function duration_string($input_duration)
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>List of Ebans</title>
-		<link rel="stylesheet" href="css/main.css">
-		<script src="jquery.1.11.3.js"></script>
+		<title>EntWatch Bans</title>
+		<script src="jquery.3.6.0.js"></script>
 		<script src="lang.js"></script>
+		<script src="ebans.js"></script>
+		<script src="xajax.js"></script>
+		<link id="theme" rel="stylesheet" href="css/themes/black/main.css">
 	</head>
 	<body onload="var lang = localStorage.getItem('lang') || 'en'; SetLang(lang);">
 		<div class="desktop">
@@ -60,11 +68,39 @@ function duration_string($input_duration)
 				<div class="navbar-container">
 					<div class="navbar-left">
 						<a key_phrase="EBan List Link" class="lang" href="./?page=1">EBan List</a>
-						<a key_phrase="Go Back Link" class="lang" href="https://google.com">Go Back</a>
+						<?php
+							if ($userbank->HasAccess(ADMIN_OWNER)) {
+								echo '<a key_phrase="Logs" class="lang" href="./?logs">Logs</a>';
+							}
+						?>
+						<?php
+						echo '<a key_phrase="Go Back Link" class="lang" href="'. $GLOBALS['SERVER_FORUM_URL'] .'">Go Back</a>'
+						?>
+						<?php
+							if (!$userbank->HasAccess(ADMIN_OWNER | ADMIN_DELETE_BAN)) {
+								echo '<a key_phrase="Login" class="lang" href="./?login">Login</a>';
+							}
+							else
+							{
+								echo '<a key_phrase="Logout" class="lang" href="./?logout">Logout</a>';
+							}
+						?>
 					</div>
 					<div class="navbar-right">
-						<a class="navbar-lang" onclick="SetLang('en'); localStorage.setItem('lang', 'en');" href="#">ENG</a>
-						<a class="navbar-lang" onclick="SetLang('ru'); localStorage.setItem('lang', 'ru');" href="#">RUS</a>
+						<div class="dropdown">
+							<button key_phrase="Theme" class="navbar-btn lang">Theme</button>
+							<div class="dropdown-content">
+								<a class="navbar-lang" onclick="SetTheme('black');" href="#">Black</a>
+								<a class="navbar-lang" onclick="SetTheme('white');" href="#">White</a>
+							</div>
+						</div>
+						<div class="dropdown">
+							<button key_phrase="Language" class="navbar-btn lang">Language</button>
+							<div class="dropdown-content">
+								<a class="navbar-lang" onclick="SetLang('en'); localStorage.setItem('lang', 'en');" href="#">ENG</a>
+								<a class="navbar-lang" onclick="SetLang('ru'); localStorage.setItem('lang', 'ru');" href="#">RUS</a>
+							</div>
+						</div>
 						<form class="navbar-form" method="get">
 							<input type="text" name="search" placeholder="SteamID" class="navbar-input">
 							<button type="submit" key_phrase="Find" class="navbar-btn lang">Find</button>
@@ -74,6 +110,193 @@ function duration_string($input_duration)
 			</nav>
 			<div class="data">
 				<?php
+				if (isset($_GET['login']))
+				{
+					if (isset($_GET['failed']))
+					{
+						echo '<center><h1 key_phrase="Authentication failed" class="btn-danger lang">Authentication failed</h1></center>';
+					}
+					echo '<table style="margin: 30px auto;">
+							<tbody>
+								<tr>
+									<h2 key_phrase="Sourcebans Admin Login" class="lang" style="text-align:center"><b>Sourcebans Admin Login</b></h2>
+								</tr>
+								<tr>
+									<td class="" style="padding: 15px;">
+										<div id="login-content">
+											<div id="loginUsernameDiv">
+												<label key_phrase="Username" for="loginUsername" class="lang">Username</label><br>
+												<input id="loginUsername" class="" type="text" name="username" value="">
+											</div>
+											<div id="loginUsernameMsg" class=""></div>
+											<br>
+											<div id="loginPasswordDiv">
+												<label key_phrase="Password" for="loginPassword" class="lang">Password</label><br>
+												<input id="loginPassword" class="" type="password" name="password" value="">
+											</div>
+											<div id="loginPasswordMsg" class=""></div>
+											<br>
+											<div id="loginRememberMeDiv">
+												<input id="loginRememberMe" type="checkbox" class="checkbox" name="remember" value="checked" vspace="5px">
+												<span key_phrase="Remember me" class="checkbox lang" style="cursor:pointer;" onclick="($(\'#loginRememberMe\').is(\':checked\')?$(\'#loginRememberMe\').prop(\'checked\', false):$(\'#loginRememberMe\').prop(\'checked\', true))">
+													Remember me
+												</span>
+											</div>
+											<br>
+											<div id="loginSubmit">
+												<br>
+												<button type="button" onclick="DoLogin(\'\');" name="alogin" class="btn btn-info" id="alogin"><span key_phrase="Login" class="lang">Login</span></button>
+											</div>														
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>';
+					return;
+				}
+				if (isset($_GET['logout']))
+				{
+					Auth::logout();
+					header('Location: /');
+					exit();
+				}
+				if (isset($_GET['edit']) && isset($_GET['table_name']) && $userbank->HasAccess(ADMIN_OWNER | ADMIN_EDIT_ALL_BANS))
+				{
+					$eban_id = $_GET['edit'];
+					$table_name = $_GET['table_name'];
+					if ($table_name != 'EntWatch_Current_Eban' && $table_name != 'EntWatch_Old_Eban')
+						return;
+
+					$GLOBALS['PDO_EBANS']->query("SELECT * FROM ".$table_name." WHERE id = :id");
+					$GLOBALS['PDO_EBANS']->bind(':id', $eban_id, PDO::PARAM_INT);
+					$row = $GLOBALS['PDO_EBANS']->single();
+					?>
+					<table class="data-eban-table">
+					<thead>
+						<tr>
+							<td key_phrase="Server" class="lang">Server</td>
+							<td key_phrase="Player" class="data-eban-center lang">Player</td>
+							<td key_phrase="PlayerSteamID" class="data-eban-center lang">Player SteamID</td>
+							<td key_phrase="Reason" class="lang">Reason</td>
+							<td key_phrase="Admin" class="data-eban-center lang">Admin</td>
+							<td key_phrase="AdminSteamID" class="data-eban-center lang">Admin SteamID</td>
+							<td key_phrase="Duration" class="lang">Duration</td>
+							<?php
+								if ($userbank->HasAccess(ADMIN_OWNER | ADMIN_EDIT_ALL_BANS)) {
+									echo '<td key_phrase="Save" class="lang">Save</td>';
+								}
+							?>
+						</tr>
+					</thead>
+					<tbody>
+					<?php 
+						$data_id = f_clean_data($row["id"]);
+						$data_server = f_clean_data($row["server"]);
+						$data_client_name = f_clean_data($row["client_name"]);
+						$data_client_steamid = f_clean_data($row["client_steamid"]);
+						$data_admin_name = f_clean_data($row["admin_name"]);
+						$data_admin_steamid = f_clean_data($row["admin_steamid"]);
+						$data_duration = f_clean_data($row["duration"]);
+						$data_issued = f_clean_data($row["timestamp_issued"]);
+						$data_reason = f_clean_data($row["reason"]);
+						$data_unban_admin_name = f_clean_data($row["admin_name_unban"]);
+						$data_unban_admin_steamid = f_clean_data($row["admin_steamid_unban"]);
+						$data_unban_reason = f_clean_data($row["reason_unban"]);
+						$data_unban_time = f_clean_data($row["timestamp_unban"]);
+						echo '<td><input id="banservername" value="'.$data_server.'"/></td>
+						<td class="data-eban-center"><input id="banplayername" value="'.$data_client_name.'"/></td>
+						<td class="data-eban-center data-eban-steamid"><input id="banplayersteamid" value="'.$data_client_steamid.'"/></td>
+						<td><input id="banreason" value="'.$data_reason.'"/></td>
+						<td class="data-eban-center"><input id="banadminname" value="'.$data_admin_name.'"/></td>
+						<td class="data-eban-center data-eban-steamid"><input id="banadminsteamid" value="'.$data_admin_steamid.'"/></td>
+						<td class="data-eban-duration">
+							<select id="banlength" name="banlength" tabindex="5" class="submit-fields">
+								<option value="'.$data_duration.'">Dont change ('.$data_duration.' mins)</option>
+								<option value="0">Permanent</option>
+								<optgroup label="minutes">
+									<option value="1">1 minute</option>
+									<option value="5">5 minutes</option>
+									<option value="10">10 minutes</option>
+									<option value="15">15 minutes</option>
+									<option value="30">30 minutes</option>
+									<option value="45">45 minutes</option>
+								</optgroup><optgroup label="hours">
+									<option value="60">1 hour</option>
+									<option value="120">2 hours</option>
+									<option value="180">3 hours</option>
+									<option value="240">4 hours</option>
+									<option value="480">8 hours</option>
+									<option value="720">12 hours</option>
+								</optgroup><optgroup label="days">
+									<option value="1440">1 day</option>
+									<option value="2880">2 days</option>
+									<option value="4320">3 days</option>
+									<option value="5760">4 days</option>
+									<option value="7200">5 days</option>
+									<option value="8640">6 days</option>
+								</optgroup><optgroup label="weeks">
+									<option value="10080">1 week</option>
+									<option value="20160">2 weeks</option>
+									<option value="30240">3 weeks</option>
+								</optgroup><optgroup label="months">
+									<option value="43200">1 month</option>
+									<option value="86400">2 months</option>
+									<option value="129600">3 months</option>
+									<option value="259200">6 months</option>
+									<option value="518400">12 months</option>
+								</optgroup>
+							</select>
+						</td>';
+						if ($userbank->HasAccess(ADMIN_OWNER | ADMIN_EDIT_ALL_BANS)) {
+							echo '<td class="data-eban-center"><button class="save" onclick="SaveBan('.$data_id.', \''.$table_name.'\', \'\')"><span key_phrase="Save" class="lang">Save</span></button></td>';
+						}
+						echo'</tr>';
+					?>
+				  </tbody>
+				</table>
+				<?php
+					return;
+				}
+				if (isset($_GET['logs']) && $userbank->HasAccess(ADMIN_OWNER))
+				{
+					echo '<table class="data-eban-table">
+						<thead>
+							<tr>
+								<td key_phrase="Title" class="lang">Title</td>
+								<td key_phrase="Message" class="data-eban-center lang">Message</td>
+								<td key_phrase="Host" class="lang">Host</td>
+								<td key_phrase="Admin ID" class="data-eban-center lang">Admin ID</td>
+								<td key_phrase="Admin Name" class="data-eban-center lang">Admin Name</td>
+								<td key_phrase="Created" class="lang">Created</td>
+							</tr>
+						</thead>
+						<tbody>';
+					$GLOBALS['PDO_EBANS']->query("SELECT * FROM `logs` ORDER BY created DESC");
+					$rows_logs = $GLOBALS['PDO_EBANS']->resultset();
+					foreach ($rows_logs as $row)
+					{
+						$data_title = f_clean_data($row["title"]);
+						$data_message = f_clean_data($row["message"]);
+						$data_host = f_clean_data($row["host"]);
+						$data_aid = f_clean_data($row["aid"]);
+						$data_created = f_clean_data($row["created"]);
+
+						$date = new DateTime();
+						$date->setTimestamp($data_created);
+						$data_created_formatted = $date->format('Y-m-d H:i:s');
+
+						echo '<td class="data-eban-center">'.$data_title.'</td>';
+						echo '<td class="data-eban-center">'.$data_message.'</td>';
+						echo '<td class="data-eban-center">'.$data_host.'</td>';
+						echo '<td class="data-eban-center">'.$data_aid.'</td>';
+						echo '<td class="data-eban-center">'.$userbank->GetUserArray($data_aid)['user'].'</td>';
+						echo '<td class="data-eban-center">'.$data_created_formatted.'</td>';
+						echo'</tr>';
+					}
+					echo '</tbody>
+						</table>';
+					return;
+				}
 				if($search_state == 1)
 				{
 					echo '<p key_phrase="Steam Wrong" class="data_search_state_error lang">SteamID is in the wrong format. Supported formats: STEAM_1:0:123456789 and [U:1:123456789]</p>';	
@@ -90,11 +313,21 @@ function duration_string($input_duration)
 							<td key_phrase="Reason" class="lang">Reason</td>
 							<td key_phrase="Admin" class="data-eban-center lang">Admin</td>
 							<td key_phrase="Duration" class="lang">Duration</td>
+							<?php
+								if ($userbank->HasAccess(ADMIN_OWNER | ADMIN_EDIT_ALL_BANS)) {
+									echo '<td key_phrase="Edit" class="lang">Edit</td>';
+								}
+								if ($userbank->HasAccess(ADMIN_OWNER | ADMIN_DELETE_BAN)) {
+									echo '<td key_phrase="Delete" class="lang">Delete</td>';
+								}
+							?>
 						</tr>
 					</thead>
 					<tbody>
 					<?php foreach ($rows_alldata as $row)
 						{
+							$data_id = f_clean_data($row["id"]);
+							$data_table_name = f_clean_data($row["table_name"]);
 							$data_server = f_clean_data($row["server"]);
 							$data_client_name = f_clean_data($row["client_name"]);
 							$data_client_steamid = f_clean_data($row["client_steamid"]);
@@ -135,6 +368,12 @@ function duration_string($input_duration)
 								echo '</td>';
 							} else {
 								echo 'data-eban-active-duration">'.duration_string($data_duration).'</td>';
+							}
+							if ($userbank->HasAccess(ADMIN_OWNER | ADMIN_EDIT_ALL_BANS)) {
+								echo '<td class="data-eban-center"><button class="edit" onclick="location.href=\'./?edit='.$data_id.'&table_name='.$data_table_name.'\'"><span key_phrase="Edit" class="lang">Edit</span></button></td>';
+							}
+							if ($userbank->HasAccess(ADMIN_OWNER | ADMIN_DELETE_BAN)) {
+								echo '<td class="data-eban-center"><button class="delete" onclick="DeleteBan('.$data_id.')"><span key_phrase="Delete" class="lang">Delete</span></button></td>';
 							}
 						echo'</tr>';
 						}?>
@@ -193,8 +432,13 @@ function duration_string($input_duration)
 					<a key_phrase="Go Back Link" class="lang mobile-navbar-link" href="https://google.com">Go Back</a>
 				</p>
 				<p>
-					<a class="navbar-lang" onclick="SetLang('en'); localStorage.setItem('lang', 'en');" href="#">ENG</a>
-					<a class="navbar-lang" onclick="SetLang('ru'); localStorage.setItem('lang', 'ru');" href="#">RUS</a>
+					<div class="dropdown">
+						<button class="dropbtn">Language</button>
+						<div class="dropdown-content">
+							<a class="navbar-lang" onclick="SetLang('en'); localStorage.setItem('lang', 'en');" href="#">ENG</a>
+							<a class="navbar-lang" onclick="SetLang('ru'); localStorage.setItem('lang', 'ru');" href="#">RUS</a>
+						</div>
+					</div>
 				</p>
 				<form method="get">
 						<input type="text" name="search" placeholder="SteamID" class="mobile-navbar-input">

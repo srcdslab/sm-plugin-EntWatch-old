@@ -1,22 +1,17 @@
 <?php
 require_once('protect.php');
 require_once('steamid.php');
-
-$host 	= 'localhost';
-$db 	= 'entwatch';
-$user 	= 'root';
-$pass 	= 'pass';
-$charset = 'utf8';
+require_once('config.php');
 
 $per_page = 20;
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-    $opt = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
-$conn = new PDO($dsn, $user, $pass, $opt);
+$dsn = "mysql:host=".EBAN_DB_HOST.";dbname=".EBAN_DB_NAME.";charset=".EBAN_DB_CHARSET;
+$opt = [
+	PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+	PDO::ATTR_EMULATE_PREPARES   => false,
+];
+$conn = new PDO($dsn, EBAN_DB_USER, EBAN_DB_PASS, $opt);
 
 $cur_page = 1;
 
@@ -73,11 +68,11 @@ $start = ($cur_page - 1) * $per_page;
 
 if($searchby_steamid == true)
 {
-	$sql = $conn->prepare('(SELECT * FROM EntWatch_Current_Eban WHERE client_steamid="'.$buff_steamid.'") UNION ALL (SELECT * FROM EntWatch_Old_Eban WHERE client_steamid="'.$buff_steamid.'") ORDER BY timestamp_issued-duration*60 DESC LIMIT :start, :perpage');
+	$sql = $conn->prepare('(SELECT *, "EntWatch_Current_Eban" as table_name FROM EntWatch_Current_Eban WHERE client_steamid="'.$buff_steamid.'") UNION ALL (SELECT *, "EntWatch_Old_Eban" as table_name FROM EntWatch_Old_Eban WHERE client_steamid="'.$buff_steamid.'") ORDER BY timestamp_issued-duration*60 DESC LIMIT :start, :perpage');
 	$sql->execute(array(':start' => $start, ':perpage' => $per_page));
 } else
 {
-	$sql = $conn->prepare('(SELECT * FROM EntWatch_Current_Eban) UNION ALL (SELECT * FROM EntWatch_Old_Eban) ORDER BY timestamp_issued-duration*60 DESC LIMIT :start, :perpage');
+	$sql = $conn->prepare('(SELECT *, "EntWatch_Current_Eban" as table_name FROM EntWatch_Current_Eban) UNION ALL (SELECT *, "EntWatch_Old_Eban" as table_name FROM EntWatch_Old_Eban) ORDER BY timestamp_issued-duration*60 DESC LIMIT :start, :perpage');
 	$sql->execute(array(':start' => $start, ':perpage' => $per_page));
 }
 

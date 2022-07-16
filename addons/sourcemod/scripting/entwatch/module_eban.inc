@@ -39,9 +39,19 @@ stock void EWM_Eban_OnPluginStart()
 	CreateTimer(60.0, EWM_Eban_Timer_Checker, _, TIMER_REPEAT);
 }
 
+stock void EWM_Eban_OnConfigsExecuted()
+{
+	EWM_Eban_GetConVars();
+}
+
+stock void EWM_Eban_GetConVars()
+{
+	g_bKeepExpiredBans = GetConVarBool(g_hCvar_Keep_Expired_Bans);
+}
+
 void Cvar_EBAN_Changed(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	g_bKeepExpiredBans = GetConVarBool(convar);
+	EWM_Eban_GetConVars();	
 }
 
 void EWM_Eban_ConnectCallBack(Database hDatabase, const char[] sError, any data)
@@ -96,6 +106,14 @@ void EWM_Eban_CreateTables()
 																									`admin_name_unban` varchar(32), \
 																									`admin_steamid_unban` varchar(64), \
 																									`timestamp_unban` int, \
+																									PRIMARY KEY (id))");
+		T_CreateTables.AddQuery(sSQL_Query);
+		FormatEx(sSQL_Query, sizeof(sSQL_Query), "CREATE TABLE IF NOT EXISTS `logs`(	`id` int(10) unsigned NOT NULL auto_increment, \
+																									`title` varchar(32) NOT NULL, \
+																									`message` varchar(1024) NOT NULL, \
+																									`host` varchar(32) NOT NULL, \
+																									`aid` int NOT NULL, \
+																									`created` int NOT NULL, \
 																									PRIMARY KEY (id))");
 		T_CreateTables.AddQuery(sSQL_Query);
 		SQL_ExecuteTransaction(g_hEbanDB, T_CreateTables, EWM_Eban_SQLCreateTables_Success, EWM_Eban_SQLCreateTables_Error, _, DBPrio_High);
@@ -190,7 +208,7 @@ public void EWM_Eban_BanClient(int iClient, int iAdmin, int iDuration, const cha
 			if(iAdmin != 0)
 			{
 				//Check if admin has permission
-				if (!CheckCommandAccess(iAdmin, "sm_eban_perm", ADMFLAG_ROOT))
+				if (!CheckCommandAccess(iAdmin, "sm_eban_perm", ADMFLAG_BAN))
 				{
 					CPrintToChat(iAdmin, "%s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Not have permission pEBan");
 					return;
@@ -225,7 +243,7 @@ public void EWM_Eban_BanClient(int iClient, int iAdmin, int iDuration, const cha
 			if(iAdmin != 0 && iBanDuration >= 720)
 			{
 				//Check if admin has permission
-				if (!CheckCommandAccess(iAdmin, "sm_eban_long", ADMFLAG_ROOT))
+				if (!CheckCommandAccess(iAdmin, "sm_eban_long", ADMFLAG_BAN))
 				{
 					CPrintToChat(iAdmin, "%s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Not have permission lEBan");
 					return;
@@ -292,7 +310,7 @@ public void EWM_Eban_UnBanClient(int iClient, int iAdmin, const char[] sReason)
 		if (iBanDuration == 0)
 		{
 			//Check if admin has permission
-			if (!CheckCommandAccess(iAdmin, "sm_eban_perm", ADMFLAG_ROOT))
+			if (!CheckCommandAccess(iAdmin, "sm_eban_perm", ADMFLAG_BAN))
 			{
 				CPrintToChat(iAdmin, "%s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Not have permission rEBan");
 				return;
@@ -300,7 +318,7 @@ public void EWM_Eban_UnBanClient(int iClient, int iAdmin, const char[] sReason)
 		}else if(iBanDuration >= 720)
 		{
 			//Check if admin has permission
-			if (!CheckCommandAccess(iAdmin, "sm_eban_long", ADMFLAG_ROOT))
+			if (!CheckCommandAccess(iAdmin, "sm_eban_long", ADMFLAG_BAN))
 			{
 				CPrintToChat(iAdmin, "%s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Not have permission lEBan");
 				return;

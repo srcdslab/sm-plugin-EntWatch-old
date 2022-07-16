@@ -24,9 +24,19 @@ stock void EWM_OfflineEban_OnPluginStart()
 	CreateTimer(60.0, EWM_OfflineEban_Timer_Checker, _, TIMER_REPEAT);
 }
 
+stock void EWM_OfflineEban_OnConfigsExecuted()
+{
+	EWM_OfflineEban_GetConVars();
+}
+
+stock void EWM_OfflineEban_GetConVars()
+{
+	g_iOfflineTimeClear = GetConVarInt(g_hCvar_OfflineClearRecords);
+}
+
 void Cvar_OfflineEBAN_Changed(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	g_iOfflineTimeClear = GetConVarInt(convar);
+	EWM_OfflineEban_GetConVars();
 }
 
 Action EWM_OfflineEban_Timer_Checker(Handle timer)

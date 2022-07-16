@@ -5,6 +5,11 @@ stock void EWM_Transfer_OnPluginStart()
 	RegAdminCmd("sm_etransfer", EWM_Transfer_Command_Transfer, ADMFLAG_BAN);
 }
 
+stock void EWM_Transfer_OnConfigsExecuted()
+{
+	
+}
+
 public void EWM_Transfer_Client(int iClient, int iTarget, int iReceiver)
 {
 	if (GetClientTeam(iTarget) != GetClientTeam(iReceiver))
