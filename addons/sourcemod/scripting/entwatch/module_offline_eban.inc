@@ -2,7 +2,7 @@
 
 #if defined EW_MODULE_EBAN
 
-ConVar g_hCvar_OfflineClearRecords;
+ConVar g_hCvar_OfflineClearRecords, g_hCvar_OfflineLongEban;
 
 int g_iOfflineTimeClear = 30;
 
@@ -13,13 +13,14 @@ class_Offline_Eban g_aMenuBuffer[MAXPLAYERS+1];
 stock void EWM_OfflineEban_OnPluginStart()
 {
 	g_OfflineArray = new ArrayList(512);
-	
+
 	g_hCvar_OfflineClearRecords		= CreateConVar("entwatch_offline_clear_time", "30", "Time during which data is stored (1-240)", _, true, 1.0, true, 240.0);
-	
+	g_hCvar_OfflineLongEban			= CreateConVar("entwatch_offline_long_eban", "10080", "Maximum time in minutes that an admin is able to eban.", _, true, 1.0);
+
 	HookConVarChange(g_hCvar_OfflineClearRecords, Cvar_OfflineEBAN_Changed);
-	
+
 	RegAdminCmd("sm_eoban", EWM_OfflineEban_Command_Restrict, ADMFLAG_RCON);
-	
+
 	//Timer Checker
 	CreateTimer(60.0, EWM_OfflineEban_Timer_Checker, _, TIMER_REPEAT);
 }
@@ -416,7 +417,8 @@ public int EWM_OfflineEban_Duration_Handler(Menu hMenu, MenuAction hAction, int 
 					CPrintToChat(iClient, "%s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Not have permission rEBan");
 					bAccessDuration = false;
 				}
-			}else if(iDuration >= 720)
+			}
+			else if(iDuration >= g_hCvar_OfflineLongEban.IntValue)
 			{
 				//Check if admin has permission
 				if (!CheckCommandAccess(iClient, "sm_eban_long", ADMFLAG_ROOT))
