@@ -76,7 +76,7 @@ public Plugin myinfo =
 	name = "EntWatch",
 	author = "DarkerZ[RUS], Cmer, maxime1907",
 	description = "Entity watcher that helps with item management.",
-	version = "3.DZ.43",
+	version = "3.DZ.44",
 	url = "dark-skill.ru"
 };
 
@@ -1001,7 +1001,7 @@ public void OnEntityCreated(int iEntity, const char[] sClassname)
 	if(IsValidEntity(iEntity))
 	{
 		if(StrContains(sClassname, "weapon_", false) != -1) SDKHook(iEntity, SDKHook_SpawnPost, OnItemSpawned);
-		else if(StrEqual(sClassname,"func_button")||StrEqual(sClassname,"func_rot_button")||
+		else if(StrEqual(sClassname,"func_button")||StrEqual(sClassname,"func_rot_button")||StrEqual(sClassname,"func_physbox_multiplayer")||
 			StrEqual(sClassname,"func_door")||StrEqual(sClassname,"func_door_rotating")) SDKHook(iEntity, SDKHook_SpawnPost, OnButtonSpawned);
 		else if (StrEqual(sClassname,"math_counter")) SDKHook(iEntity, SDKHook_SpawnPost, OnMathSpawned);
 		else if(StrContains(sClassname, "trigger_", false) != -1) SDKHook(iEntity, SDKHook_SpawnPost, OnTriggerSpawned);
@@ -1215,7 +1215,10 @@ public Action OnButtonUse(int iButton, int iActivator, int iCaller, UseType uTyp
 						if(ItemTest.ButtonID2 == INVALID_ENT_REFERENCE) iAbility = 0;
 						
 						//Base delay on the wait time of the button (button is locked for this duration)
-						int waitTime = RoundToFloor(GetEntPropFloat(iButton, Prop_Data, "m_flWait"));
+						//int waitTime = RoundToFloor(GetEntPropFloat(iButton, Prop_Data, "m_flWait"));
+						int waitTime = 0;
+						if (HasEntProp(iButton, Prop_Data, "m_flWait"))
+							waitTime = RoundToFloor(GetEntPropFloat(iButton, Prop_Data, "m_flWait"));
 						if(waitTime < 0) waitTime = 0;
 						
 						if(iAbility!=2)
