@@ -96,6 +96,10 @@
 	{
 		"en" 	"EBan Reason for"
 	}
+	"EUnBan Reason for"
+	{
+		"en" 	"EUnBan Reason for"
+	}
 	"Temporary"
 	{
 		"en" 	"Temporary"
@@ -353,6 +357,22 @@
 	{
 		"en" 	"Not listening to leader"
 	}
+	"Wrong target"
+	{
+		"en"	"Wrong target"
+	}
+	"Giving another chance"
+	{
+		"en"	"Giving another chance"
+	}
+	"Bad duration"
+	{
+		"en"	"Bad duration"
+	}
+	"Was not on purpose"
+	{
+		"en"	"Was not on purpose"
+	}
 	"Other"
 	{
 		"en" 	"Other"
@@ -419,7 +439,15 @@
 	}
 	"Hud Type"
 	{
-		"en" 	"Type of HUD"
+		"en" 	"Type of HUD : "
+	}
+	"HUD"
+	{
+		"en"	"HUD"
+	}
+	"KeyHintText"
+	{
+		"en"	"KeyHintText"
 	}
 	"Hud Names"
 	{

@@ -549,13 +549,18 @@ public Action EWM_Hud_Command_ToggleHUDType(int iClient, int iArgs)
 {
 	if((IsClientConnected(iClient) && IsClientInGame(iClient)))
 	{
-		CPrintToChat(iClient, "%s%t %s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Hud Type", g_SchemeConfig.Color_Disabled, "Modified");
-		g_CSettings_Hud[iClient].Type++;
-		if (g_CSettings_Hud[iClient].Type > 1)
-			g_CSettings_Hud[iClient].Type = 0;
-		char num[10];
-		IntToString(g_CSettings_Hud[iClient].Type, num, sizeof(num));
-		SetClientCookie(iClient, g_hCookie_HudName, num);
+		if (g_CSettings_Hud[iClient].Type)
+		{
+			CPrintToChat(iClient, "%s%t %s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Hud Type", g_SchemeConfig.Color_Enabled, "HUD");
+			g_CSettings_Hud[iClient].Type = false;
+			SetClientCookie(iClient, g_hCookie_HudType, "0");
+		}
+		else
+		{
+			CPrintToChat(iClient, "%s%t %s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Hud Type", g_SchemeConfig.Color_Enabled, "KeyHintText");
+			g_CSettings_Hud[iClient].Type = true;
+			SetClientCookie(iClient, g_hCookie_HudType, "1");
+		}
 	}
 	return Plugin_Handled;
 }

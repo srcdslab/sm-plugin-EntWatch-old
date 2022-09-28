@@ -74,7 +74,7 @@ ArrayList g_TriggerArray;
 public Plugin myinfo = 
 {
 	name = "EntWatch",
-	author = "DarkerZ[RUS], Cmer, maxime1907",
+	author = "DarkerZ[RUS], Cmer, maxime1907, .Rushaway",
 	description = "Entity watcher that helps with item management.",
 	version = "3.DZ.44",
 	url = "dark-skill.ru"

@@ -14,11 +14,11 @@
 	}
 	"Use First"
 	{
-		"en" 	"использовал 1-ую способность"
+		"ru" 	"использовал 1-ую способность"
 	}
 	"Use Second"
 	{
-		"en" 	"использовал 2-ую способность"
+		"ru" 	"использовал 2-ую способность"
 	}
 	"Pickup"
 	{
@@ -94,7 +94,11 @@
 	}
 	"EBan Reason for"
 	{
-		"ru" 	"Причина ЕБана для"
+		"ru" 	"Разбан по причине для"
+	}
+	"EUnBan Reason for"
+	{
+		"ru" 	"EUnBan Reason for"
 	}
 	"Temporary"
 	{
@@ -353,6 +357,22 @@
 	{
 		"ru" 	"Не слушает лидера"
 	}
+	"Wrong target"
+	{
+		"ru"	"Неправильная цель"
+	}
+	"Giving another chance"
+	{
+		"ru"	"Даю ещё один шанс"
+	}
+	"Bad duration"
+	{
+		"ru"	"Плохая продолжительность"
+	}
+	"Was not on purpose"
+	{
+		"ru"	"Было не специально"
+	}
 	"Other"
 	{
 		"ru" 	"Другая"
@@ -419,7 +439,15 @@
 	}
 	"Hud Type"
 	{
-		"ru" 	"тип HUD"
+		"ru" 	"тип HUD : "
+	}
+	"HUD"
+	{
+		"ru"    "HUD"
+	}
+	"KeyHintText"
+	{
+		"ru"    "KeyHintText"
 	}
 	"Hud Names"
 	{
