@@ -304,7 +304,7 @@ public Action EWM_Hud_Timer_DisplayHUD(Handle timer, int client)
 				if(g_iRotation[2][1] > iMaxAList-1) g_iRotation[2][1] = 0;
 			}
 		}
-		char sMes_Humans[1024];
+		char sMes_Humans[255];
 		char sMes_Humans_woname[1024];
 		char sMes_Zombies[1024];
 		char sMes_Zombies_woname[1024];
