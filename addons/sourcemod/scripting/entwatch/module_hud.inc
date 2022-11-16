@@ -304,12 +304,12 @@ public Action EWM_Hud_Timer_DisplayHUD(Handle timer, int client)
 				if(g_iRotation[2][1] > iMaxAList-1) g_iRotation[2][1] = 0;
 			}
 		}
-		char sMes_Humans[255];
-		char sMes_Humans_woname[1024];
-		char sMes_Zombies[1024];
-		char sMes_Zombies_woname[1024];
-		char sMes_Admins[1024];
-		char sMes_Admins_woname[1024];
+		char sMes_Humans[250];
+		char sMes_Humans_woname[250];
+		char sMes_Zombies[250];
+		char sMes_Zombies_woname[250];
+		char sMes_Admins[250];
+		char sMes_Admins_woname[250];
 		EWM_Hud_Construct_String(sMes_Humans, sizeof(sMes_Humans), sMes_Humans_woname, sizeof(sMes_Humans_woname), iCountHItems, iMaxHList, 0);
 		EWM_Hud_Construct_String(sMes_Zombies, sizeof(sMes_Zombies), sMes_Zombies_woname, sizeof(sMes_Zombies_woname), iCountZMItems, iMaxZMList, 1);
 		EWM_Hud_Construct_String(sMes_Admins, sizeof(sMes_Admins), sMes_Admins_woname, sizeof(sMes_Admins_woname), iCountAItems, iMaxAList, 2, iCountHItems);
