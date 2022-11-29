@@ -1,10 +1,12 @@
 #define EW_MODULE_ELOGS
 
 ConVar	g_hCvar_ELog_Type;
+ConVar	g_hCvar_ELog_Webhook;
 
 stock void EWM_ELogs_OnPluginStart()
 {
 	g_hCvar_ELog_Type		= CreateConVar("entwatch_elog_type", "0", "How should elogs be notified (0 = Server, 1 = Discord)", _, true, 0.0, true, 1.0);
+	g_hCvar_ELog_Webhook	= CreateConVar("entwatch_elog_webhook", "", "The webhook URL of your Discord channel.", FCVAR_PROTECTED);
 }
 
 stock void EWM_ELogs_OnConfigsExecuted()
@@ -31,13 +33,26 @@ stock void EWM_ELogs_Log(int client, int target, const char[] message)
 
 		if(StrContains(sMessage, "\"") != -1)
 			ReplaceString(sMessage, sizeof(sMessage), "\"", "");
-#if defined _Discord_Included
-		Discord_SendMessage(sWebhook, sMessage);
-#endif
+
+		char szWebhookURL[1000];
+		g_hCvar_ELog_Webhook.GetString(szWebhookURL, sizeof szWebhookURL);
+
+		Webhook webhook = new Webhook(sMessage);
+
+		webhook.Execute(szWebhookURL, OnWebHookExecuted);
+		delete webhook;
 	}
 	else
 	{
 		LogAction(client, target, message);
+	}
+}
+
+public void OnWebHookExecuted(HTTPResponse response, DataPack pack)
+{
+	if (response.Status != HTTPStatus_OK)
+	{
+		LogError("Failed to send entwatch webhook");
 	}
 }
 
