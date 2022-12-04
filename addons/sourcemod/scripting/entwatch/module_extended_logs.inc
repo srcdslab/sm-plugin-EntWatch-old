@@ -18,9 +18,6 @@ stock void EWM_ELogs_Log(int client, int target, const char[] message)
 {
 	if (g_hCvar_ELog_Type.IntValue == 1)
 	{
-		char sWebhook[64];
-		Format(sWebhook, sizeof(sWebhook), "entwatch");
-
 		char sMessage[4096];
 		char sTime[64];
 		int iTime = GetTime();
