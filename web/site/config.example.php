@@ -9,6 +9,7 @@ define('SBPP_DB_NAME', 'example'); // Database name
 define('SBPP_DB_PREFIX', 'sb'); // The table prefix for SourceBans
 define('SBPP_DB_PORT', '3306'); // The SQL port (Default: 3306)
 define('SBPP_DB_CHARSET', 'utf8mb4'); // The Database charset (Default: utf8)
+define('SB_NEW_SALT', '$5$'); //Salt for passwords
 
 define('EBAN_DB_HOST', '127.0.0.1'); // The host/ip to your SQL server
 define('EBAN_DB_USER', 'example'); // The username to connect with
