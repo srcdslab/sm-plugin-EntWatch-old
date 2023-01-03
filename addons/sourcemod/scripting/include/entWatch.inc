@@ -170,7 +170,7 @@ public SharedPlugin __pl_EntWatch =
 };
 
 #if !defined REQUIRE_PLUGIN
-public __pl_entWatch_SetNTVOptional()
+public void __pl_entWatch_SetNTVOptional()
 {
 	MarkNativeAsOptional("EntWatch_IsClientBanned");
 	MarkNativeAsOptional("EntWatch_BanClient");
