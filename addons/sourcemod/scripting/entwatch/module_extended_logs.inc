@@ -1,12 +1,15 @@
 #define EW_MODULE_ELOGS
+#define WEBHOOK_URL_MAX_SIZE	1000
 
 ConVar	g_hCvar_ELog_Type;
 ConVar	g_hCvar_ELog_Webhook;
+ConVar g_hCvar_ELog_WebhookRetry;
 
 stock void EWM_ELogs_OnPluginStart()
 {
 	g_hCvar_ELog_Type		= CreateConVar("entwatch_elog_type", "0", "How should elogs be notified (0 = Server, 1 = Discord)", _, true, 0.0, true, 1.0);
 	g_hCvar_ELog_Webhook	= CreateConVar("entwatch_elog_webhook", "", "The webhook URL of your Discord channel.", FCVAR_PROTECTED);
+	g_hCvar_ELog_WebhookRetry = CreateConVar("entwatch_elog_webhook_retry", "3", "Number of retries if webhook fails.", FCVAR_PROTECTED);
 }
 
 stock void EWM_ELogs_OnConfigsExecuted()
@@ -18,6 +21,14 @@ stock void EWM_ELogs_Log(int client, int target, const char[] message)
 {
 	if (g_hCvar_ELog_Type.IntValue == 1)
 	{
+		char sWebhookURL[WEBHOOK_URL_MAX_SIZE];
+		g_hCvar_ELog_Webhook.GetString(sWebhookURL, sizeof sWebhookURL);
+		if(!sWebhookURL[0])
+		{
+			LogError("[EntWatch-Elogs] No webhook found or specified.");
+			return;
+		}
+
 		char sMessage[4096];
 		char sTime[64];
 		int iTime = GetTime();
@@ -31,13 +42,7 @@ stock void EWM_ELogs_Log(int client, int target, const char[] message)
 		if(StrContains(sMessage, "\"") != -1)
 			ReplaceString(sMessage, sizeof(sMessage), "\"", "");
 
-		char szWebhookURL[1000];
-		g_hCvar_ELog_Webhook.GetString(szWebhookURL, sizeof szWebhookURL);
-
-		Webhook webhook = new Webhook(sMessage);
-
-		webhook.Execute(szWebhookURL, OnWebHookExecuted);
-		delete webhook;
+		SendWebHook(sMessage, sWebhookURL);
 	}
 	else
 	{
@@ -45,12 +50,49 @@ stock void EWM_ELogs_Log(int client, int target, const char[] message)
 	}
 }
 
+stock void SendWebHook(char sMessage[4096], char sWebhookURL[WEBHOOK_URL_MAX_SIZE])
+{
+	Webhook webhook = new Webhook(sMessage);
+
+	DataPack pack = new DataPack();
+	pack.WriteString(sMessage);
+	pack.WriteString(sWebhookURL);
+
+	webhook.Execute(sWebhookURL, OnWebHookExecuted, pack);
+	delete webhook;
+}
+
 public void OnWebHookExecuted(HTTPResponse response, DataPack pack)
 {
+	static int retries = 0;
+
+	pack.Reset();
+
+	char sMessage[4096];
+	pack.ReadString(sMessage, sizeof(sMessage));
+
+	char sWebhookURL[WEBHOOK_URL_MAX_SIZE];
+	pack.ReadString(sWebhookURL, sizeof(sWebhookURL));
+
+	delete pack;
+
 	if (response.Status != HTTPStatus_OK)
 	{
-		LogError("Failed to send entwatch webhook");
+		if (retries < g_hCvar_ELog_WebhookRetry.IntValue)
+		{
+			PrintToServer("[EntWatch-ELogs] Failed to send the webhook. Resending it .. (%d/%d)", retries, g_hCvar_ELog_WebhookRetry.IntValue);
+
+			SendWebHook(sMessage, sWebhookURL);
+			retries++;
+			return;
+		}
+		else
+		{
+			LogError("[EntWatch-Elogs] Failed to send the webhook after %d retries, aborting.", retries);
+		}
 	}
+
+	retries = 0;
 }
 
 stock void EWM_ELogs_Use(class_ItemList ItemTest, int iClient, int iAbility)
