@@ -18,6 +18,10 @@
 ```
 6. Restart Server
 
+# Web interface
+
+https://github.com/srcdslab/ebans-web
+
 # Features:
 - New Syntax
 - Removed some options from the config
