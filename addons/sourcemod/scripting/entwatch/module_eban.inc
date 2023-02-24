@@ -593,61 +593,59 @@ void EWM_Eban_CleanData_All()
 //-------------------------------------------------------
 public Action EWM_Eban_Command_Restrict(int iClient, int iArgs)
 {
-	if((IsClientConnected(iClient) && IsClientInGame(iClient)))
+	if (GetCmdArgs() < 1)
 	{
-		if (GetCmdArgs() < 1)
-		{
-			CReplyToCommand(iClient, "%s%t %s%t: sm_eban <target> [<duration>] [<reason>]", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Usage");
-			return Plugin_Handled;
-		}
-		char sTarget_argument[64];
-		GetCmdArg(1, sTarget_argument, sizeof(sTarget_argument));
+		CReplyToCommand(iClient, "%s%t %s%t: sm_eban <target> [<duration>] [<reason>]", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Usage");
+		return Plugin_Handled;
+	}
+	char sTarget_argument[64];
+	GetCmdArg(1, sTarget_argument, sizeof(sTarget_argument));
 
-		int iTarget = -1;
-		if((iTarget = FindTarget(iClient, sTarget_argument, true)) == -1) return Plugin_Handled;
-		
-		int iDuration = -1;
-		char sReason[64];
-		if(GetCmdArgs() == 1)
+	int iTarget = -1;
+	if((iTarget = FindTarget(iClient, sTarget_argument, true)) == -1) return Plugin_Handled;
+
+	int iDuration = -1;
+	char sReason[64];
+	if(GetCmdArgs() == 1)
+	{
+		iDuration = GetConVarInt(g_hCvar_Default_BanTime);
+		if(GetConVarBool(g_hCvar_Use_Reason_Menu) && IsClientConnected(iClient) && !IsFakeClient(iClient))
 		{
-			iDuration = GetConVarInt(g_hCvar_Default_BanTime);
-			if(GetConVarBool(g_hCvar_Use_Reason_Menu))
-			{
-				EWM_Eban_Menu_EBanReason(iClient, iTarget, iDuration);
-				return Plugin_Handled;
-			}else
-			{
-				GetConVarString(g_hCvar_Default_BanReason, sReason, sizeof(sReason));
-			}
-		}else if(GetCmdArgs() == 2)
-		{
-			GetCmdArg(2, sTarget_argument, sizeof(sTarget_argument));
-			iDuration = StringToInt(sTarget_argument);
-			if(GetConVarBool(g_hCvar_Use_Reason_Menu))
-			{
-				EWM_Eban_Menu_EBanReason(iClient, iTarget, iDuration);
-				return Plugin_Handled;
-			}else
-			{
-				GetConVarString(g_hCvar_Default_BanReason, sReason, sizeof(sReason));
-			}
+			EWM_Eban_Menu_EBanReason(iClient, iTarget, iDuration);
+			return Plugin_Handled;
 		}else
 		{
-			GetCmdArg(2, sTarget_argument, sizeof(sTarget_argument));
-			iDuration = StringToInt(sTarget_argument);
-			GetCmdArg(3, sTarget_argument, sizeof(sTarget_argument));
-			
-			FormatEx(sReason, sizeof(sReason), "%s", sTarget_argument);
+			GetConVarString(g_hCvar_Default_BanReason, sReason, sizeof(sReason));
 		}
-
-		if (iDuration > GetConVarInt(g_hCvar_MaxBanTime) || iDuration < -1)
+	}else if(GetCmdArgs() == 2)
+	{
+		GetCmdArg(2, sTarget_argument, sizeof(sTarget_argument));
+		iDuration = StringToInt(sTarget_argument);
+		if(GetConVarBool(g_hCvar_Use_Reason_Menu))
 		{
-			CReplyToCommand(iClient, "%s%t %s%t: Invalid duration supplied, value must be between 1 and %d (0 = Perma, -1 = Temporary)", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Usage", GetConVarInt(g_hCvar_MaxBanTime));
+			EWM_Eban_Menu_EBanReason(iClient, iTarget, iDuration);
 			return Plugin_Handled;
+		}else
+		{
+			GetConVarString(g_hCvar_Default_BanReason, sReason, sizeof(sReason));
 		}
+	}else
+	{
+		GetCmdArg(2, sTarget_argument, sizeof(sTarget_argument));
+		iDuration = StringToInt(sTarget_argument);
+		GetCmdArg(3, sTarget_argument, sizeof(sTarget_argument));
 
-		EWM_Eban_BanClient(iTarget, iClient, iDuration, sReason);
+		FormatEx(sReason, sizeof(sReason), "%s", sTarget_argument);
 	}
+
+	if (iDuration > GetConVarInt(g_hCvar_MaxBanTime) || iDuration < -1)
+	{
+		CReplyToCommand(iClient, "%s%t %s%t: Invalid duration supplied, value must be between 1 and %d (0 = Perma, -1 = Temporary)", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Usage", GetConVarInt(g_hCvar_MaxBanTime));
+		return Plugin_Handled;
+	}
+
+	EWM_Eban_BanClient(iTarget, iClient, iDuration, sReason);
+
 	return Plugin_Handled;
 }
 
@@ -656,34 +654,32 @@ public Action EWM_Eban_Command_Restrict(int iClient, int iArgs)
 //-------------------------------------------------------
 public Action EWM_Eban_Command_Unrestrict(int iClient, int iArgs)
 {
-	if((IsClientConnected(iClient) && IsClientInGame(iClient)))
+	if (GetCmdArgs() < 1)
 	{
-		if (GetCmdArgs() < 1)
-		{
-			CReplyToCommand(iClient, "%s%t %s%t: sm_eunban <target> [<reason>]", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Usage");
-			return Plugin_Handled;
-		}
-		char sTarget_argument[64];
-		GetCmdArg(1, sTarget_argument, sizeof(sTarget_argument));
-
-		int iTarget = -1;
-		if((iTarget = FindTarget(iClient, sTarget_argument, true)) == -1) return Plugin_Handled;
-		
-		char sReason[64];
-		if(GetCmdArgs() == 1)
-		{
-			if(GetConVarBool(g_hCvar_Use_Reason_Menu))
-			{
-				EWM_EUnban_Menu_EUnBanReason(iClient, iTarget);
-				return Plugin_Handled;
-			}else
-			{
-				GetConVarString(g_hCvar_Default_UnBanReason, sReason, sizeof(sReason));
-			}
-		}
-
-		EWM_Eban_UnBanClient(iTarget, iClient, sReason);
+		CReplyToCommand(iClient, "%s%t %s%t: sm_eunban <target> [<reason>]", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Usage");
+		return Plugin_Handled;
 	}
+	char sTarget_argument[64];
+	GetCmdArg(1, sTarget_argument, sizeof(sTarget_argument));
+
+	int iTarget = -1;
+	if((iTarget = FindTarget(iClient, sTarget_argument, true)) == -1) return Plugin_Handled;
+
+	char sReason[64];
+	if(GetCmdArgs() == 1)
+	{
+		if(GetConVarBool(g_hCvar_Use_Reason_Menu) && IsClientConnected(iClient) && !IsFakeClient(iClient))
+		{
+			EWM_EUnban_Menu_EUnBanReason(iClient, iTarget);
+			return Plugin_Handled;
+		}else
+		{
+			GetConVarString(g_hCvar_Default_UnBanReason, sReason, sizeof(sReason));
+		}
+	}
+
+	EWM_Eban_UnBanClient(iTarget, iClient, sReason);
+
 	return Plugin_Handled;
 }
 
