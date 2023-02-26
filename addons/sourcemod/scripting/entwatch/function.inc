@@ -198,6 +198,8 @@ enum struct class_ClientSettings_Hud
 	float		Pos_X;
 	float		Pos_Y;
 	bool		Name;
+	int 		ItemsCount;
+	int			RotorTime;
 }
 
 enum struct class_ClientSettings_EBan
