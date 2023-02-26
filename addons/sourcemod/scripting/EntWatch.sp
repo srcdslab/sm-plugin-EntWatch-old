@@ -522,6 +522,7 @@ public void OnClientDisconnect(int iClient)
 	#endif
 	#if defined EW_MODULE_HUD
 	EWM_Hud_LoadDefaultClientSettings(iClient);
+	EWM_Hud_OnClientDisconnect(iClient);
 	#endif
 	#if defined EW_MODULE_CLANTAG
 	EWM_Clantag_OnClientDisconnect(iClient);
@@ -883,7 +884,7 @@ public bool RegisterItem(class_ItemConfig ItemConfig, int iEntity, int iHammerID
 		NewItem.Team = -1;
 		NewItem.LockButton = false;
 		NewItem.LockButton2 = false;
-		//PrintToServer("[EW]Item Spawned: %s |%i", NewItem.ShortName, iEntity);
+		PrintToServer("[EW]Item Spawned: %s |%i", NewItem.ShortName, iEntity);
 		
 		g_ItemList.PushArray(NewItem, sizeof(NewItem));
 		

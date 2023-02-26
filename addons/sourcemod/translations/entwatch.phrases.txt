@@ -501,4 +501,12 @@
 	{
 		"en"	"Configs has been reloaded.."
 	}
+	"Hud Items"
+    {
+    	"en"	"HUD Items"
+    }
+    "Hud Rotation"
+    {
+    	"en"	"HUD Rotation"
+    }
 }
